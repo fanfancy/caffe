@@ -1,5 +1,14 @@
-#ifndef CAFFE_CONV_LAYER_HPP_
-#define CAFFE_CONV_LAYER_HPP_
+/*
+ * depthwise_conv_layer.hpp
+ *
+ *  Created on: May 23, 2017
+ *      Author: liuhao
+ */
+
+#ifndef CAFFE_DEPTHWISE_CONV_LAYER_HPP_
+#define CAFFE_DEPTHWISE_CONV_LAYER_HPP_
+
+
 
 #include <vector>
 
@@ -28,7 +37,7 @@ namespace caffe {
  *   the output channel N' columns of the output matrix.
  */
 template <typename Dtype>
-class ConvolutionLayer : public BaseConvolutionLayer<Dtype> {
+class DepthwiseConvolutionLayer : public BaseConvolutionLayer<Dtype> {
  public:
   /**
    * @param param provides ConvolutionParameter convolution_param,
@@ -61,10 +70,10 @@ class ConvolutionLayer : public BaseConvolutionLayer<Dtype> {
    *  - engine: convolution has CAFFE (matrix multiplication) and CUDNN (library
    *    kernels + stream parallelism) engines.
    */
-  explicit ConvolutionLayer(const LayerParameter& param)
+  explicit DepthwiseConvolutionLayer(const LayerParameter& param)
       : BaseConvolutionLayer<Dtype>(param) {}
 
-  virtual inline const char* type() const { return "Convolution"; }
+  virtual inline const char* type() const { return "DepthwiseConvolution"; }
 
  protected:
   virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
@@ -76,11 +85,13 @@ class ConvolutionLayer : public BaseConvolutionLayer<Dtype> {
   virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
       const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
   virtual inline bool reverse_dimensions() { return false; }
+  virtual inline bool compress_weights() {return true; }
   virtual void compute_output_shape();
-  virtual inline bool compress_weights() {return false; }
-  
+  virtual void ComputeBlobMask();
 };
 
 }  // namespace caffe
 
-#endif  // CAFFE_CONV_LAYER_HPP_
+
+
+#endif /* INCLUDE_CAFFE_LAYERS_DEPTHWISE_CONV_LAYER_HPP_ */

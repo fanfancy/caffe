@@ -62,6 +62,12 @@ class BaseConvolutionLayer : public Layer<Dtype> {
   // Compute height_out_ and width_out_ from other parameters.
   virtual void compute_output_shape() = 0;
 
+  // compress_weights should return true if we are implementing cmpconv, so
+  // that will set weights prunning and quantization
+  virtual bool compress_weights() = 0;
+ 
+  virtual void ComputeBlobMask() {}
+
   /// @brief The spatial dimensions of a filter kernel.
   Blob<int> kernel_shape_;
   /// @brief The spatial dimensions of the stride.
@@ -76,6 +82,10 @@ class BaseConvolutionLayer : public Layer<Dtype> {
   vector<int> col_buffer_shape_;
   /// @brief The spatial dimensions of the output.
   vector<int> output_shape_;
+  /// temp variables for weight quantization.
+  Blob<Dtype> tmpDiff_;
+  Blob<int> freq_;
+
   const vector<int>* bottom_shape_;
 
   int num_spatial_axes_;
@@ -92,6 +102,11 @@ class BaseConvolutionLayer : public Layer<Dtype> {
   bool bias_term_;
   bool is_1x1_;
   bool force_nd_im2col_;
+  //sparse parameters
+  float sparse_ratio_;
+  int class_num_;
+  bool quantize_term_;
+
 
  private:
   // wrap im2col/col2im so we don't have to remember the (long) argument lists

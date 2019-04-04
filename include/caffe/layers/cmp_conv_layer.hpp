@@ -1,5 +1,5 @@
-#ifndef CAFFE_CONV_LAYER_HPP_
-#define CAFFE_CONV_LAYER_HPP_
+#ifndef CAFFE_CMP_CONV_LAYER_HPP_
+#define CAFFE_CMP_CONV_LAYER_HPP_
 
 #include <vector>
 
@@ -12,6 +12,7 @@
 namespace caffe {
 
 /**
+ * this is the compressed format of traditional convolution layer.
  * @brief Convolves the input image with a bank of learned filters,
  *        and (optionally) adds biases.
  *
@@ -28,11 +29,11 @@ namespace caffe {
  *   the output channel N' columns of the output matrix.
  */
 template <typename Dtype>
-class ConvolutionLayer : public BaseConvolutionLayer<Dtype> {
+class CmpConvolutionLayer : public BaseConvolutionLayer<Dtype> {
  public:
   /**
-   * @param param provides ConvolutionParameter convolution_param,
-   *    with ConvolutionLayer options:
+   * @param param provides CmpConvolutionParameter cmp_convolution_param,
+   *    with CmpConvolutionLayer options:
    *  - num_output. The number of filters.
    *  - kernel_size / kernel_h / kernel_w. The filter dimensions, given by
    *  kernel_size for square filters or kernel_h and kernel_w for rectangular
@@ -60,11 +61,13 @@ class ConvolutionLayer : public BaseConvolutionLayer<Dtype> {
    *  - bias_term (\b optional, default true). Whether to have a bias.
    *  - engine: convolution has CAFFE (matrix multiplication) and CUDNN (library
    *    kernels + stream parallelism) engines.
+   *  - sparse_ratio: the sparsity ratio of weights prunning
+   *  - class_num: the cluster numbers of k-means
    */
-  explicit ConvolutionLayer(const LayerParameter& param)
+  explicit CmpConvolutionLayer(const LayerParameter& param)
       : BaseConvolutionLayer<Dtype>(param) {}
 
-  virtual inline const char* type() const { return "Convolution"; }
+  virtual inline const char* type() const { return "CmpConvolution"; }
 
  protected:
   virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
@@ -76,11 +79,11 @@ class ConvolutionLayer : public BaseConvolutionLayer<Dtype> {
   virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
       const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
   virtual inline bool reverse_dimensions() { return false; }
+  virtual inline bool compress_weights() {return true; }
   virtual void compute_output_shape();
-  virtual inline bool compress_weights() {return false; }
-  
+  virtual void ComputeBlobMask();
 };
 
 }  // namespace caffe
 
-#endif  // CAFFE_CONV_LAYER_HPP_
+#endif  // CAFFE_CMP_CONV_LAYER_HPP_

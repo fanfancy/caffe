@@ -43,6 +43,7 @@ class DeconvolutionLayer : public BaseConvolutionLayer<Dtype> {
   virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
       const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
   virtual inline bool reverse_dimensions() { return true; }
+  virtual inline bool compress_weights() { return false; }
   virtual void compute_output_shape();
 };
 

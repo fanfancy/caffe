@@ -15,6 +15,10 @@
  Forward declare boost::thread instead of including boost/thread.hpp
  to avoid a boost/NVCC issues (#1009, #1010) on OSX.
  */
+
+//#define CONV_QUNUM 256
+//#define FC_QUNUM 32
+
 namespace boost { class mutex; }
 
 namespace caffe {
@@ -293,6 +297,8 @@ class Layer {
   virtual inline bool AllowForceBackward(const int bottom_index) const {
     return true;
   }
+  
+  virtual void ComputeBlobMask() {}
 
   /**
    * @brief Specifies whether the layer should compute gradients w.r.t. a
@@ -324,6 +330,16 @@ class Layer {
   Phase phase_;
   /** The vector that stores the learnable parameters as a set of blobs. */
   vector<shared_ptr<Blob<Dtype> > > blobs_;
+
+  //vector<int> masks_;
+  Blob<int> masks_;
+ 
+  Blob<int> indices_;
+  //vector<int> indices_;
+
+  Blob<Dtype> centroids_;
+  //vector<Dtype> centroids_;
+
   /** Vector indicating whether to compute the diff of each param blob. */
   vector<bool> param_propagate_down_;
 
@@ -362,6 +378,7 @@ class Layer {
     // LOG(WARNING) << "Using CPU code as backup.";
     Backward_cpu(top, propagate_down, bottom);
   }
+ 
 
   /**
    * Called by the parent Layer's SetUp to check that the number of bottom
